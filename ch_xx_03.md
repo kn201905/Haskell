@@ -27,17 +27,14 @@ data BookReview = BookReview CustomerID ReviewBody
 type BookRecord = (BookInfo, BookReview)
 ```
 
-## いろいろな例
-```Haskell
-data Bool = False | True
-data Color = Red | Blue | Green
-data Position2D = Cartesian2D Double Double
-                | Polar2D Double Double
+## 型引数をとる型構築子
+`data` は型構築子を定義するものですが、**型引数** を持たせることができます。
+以下の例では、`a` が「型引数」となります。
+
 ```
-型に「型引数」を与えることもできる。<br>
-一般的な言語でいうと、ジェネリクスのイメージとなる。
-```
-data PointXY a = XY a a
+ghci> data PointXY a = XY a a deriving Show
+
+ghci> pt1 = XY 1 1
 ```
 上記の `a` の部分が「型引数」と言われる部分になる。実際の使用例は以下の通り。
 ```
@@ -57,6 +54,10 @@ Haskell は、型を推論をさせることが普通であるので、以下の
 pt_5 = XY 20 30  -- この場合は、PointXY Int と推論される
 pt_6 = XY 6.5 7.5  -- この場合は、PointXY Double と推論される
 ```
+
+> Tips<br>
+> 一般的なプログラミング言語では、型引数はジェネリクスとイメージが一致します。
+
 
 ## パターンマッチ
 Haskell には強力なパターンマッチの機能が備わっている。
