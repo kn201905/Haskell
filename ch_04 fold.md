@@ -35,7 +35,7 @@
 `foldl` は、Haskell でよく利用される関数です。`foldl` の型を見てみましょう。
 ```
 ghci> :t foldl
-foldl :: Foldable t => (b -> a -> b) -> b -> t a -> b
+foldl :: Foldable t => (a -> b -> a) -> a -> t b -> a
 ```
 `t` は、`Foldable t` となっているので、畳み込みができるもの、つまり、連結操作ができるものであると考えてください。<br> 
 その `t` を用いて、`t b` とありますが、
