@@ -1,0 +1,20 @@
+入力された２つの整数の和が、偶数になるか奇数になるか表示しよう。入力は "10 25" のように、２つの数字の間にスペースを入れたものとする。
+
+```
+inputs :: IO [Int]
+inputs = map read . words <$> getLine
+
+main :: IO ()
+main = do
+  [a, b] <- inputs
+  let result = if odd (a * b) then "Odd" else "Even"
+  putStrLn result
+```
+
+上のコードで重要になるのは `map read . words` となる。Haskell では、関数の適用が最も優先順位が高くなるため、`(map read) . words` と読むことになる。<br>
+以下のようになることに留意するとよいと思う。
+
+```
+ghci> :t (map read) . words
+(map read) . words :: Read b => String -> [b]
+```
