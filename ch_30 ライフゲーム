@@ -1,0 +1,87 @@
+```Haskell
+module Main where
+
+import System.Random
+import Control.Monad
+import qualified Data.Set as Set
+import Control.Concurrent ( threadDelay )
+import System.Console.ANSI ( clearScreen, setCursorPosition )
+
+type Pos = (Int, Int)
+
+-------------------------------------
+width :: Int
+width = 20
+
+height :: Int
+height = 20
+
+delayInterval :: Int
+delayInterval = 1 * 1000 * 1000
+
+-------------------------------------
+makeLife :: IO Pos
+makeLife = do
+  x <- getStdRandom $ randomR(0, width - 1) :: IO Int
+  y <- getStdRandom $ randomR(0, height - 1) :: IO Int
+  return (x, y)
+
+ordNub :: Ord a => [a] -> [a]
+ordNub xs = foldr f (const []) xs Set.empty
+  where
+    f :: Ord a => a -> (Set.Set a -> [a]) -> Set.Set a -> [a]
+    f x k s = if Set.member x s then k s else x : k (Set.insert x s)
+
+initCells :: IO [Pos]
+initCells = replicateM ((width * height) `div` 5) makeLife
+
+-------------------------------------
+wrap :: Pos -> Pos
+wrap (x, y) = (mod x width, mod y width)
+
+neighbors :: Pos -> [Pos]
+neighbors (x, y)
+  = map wrap [
+    (x-1, y-1), (x, y-1), (x+1, y-1),
+    (x-1, y), (x+1, y),
+    (x-1, y+1), (x, y+1), (x+1, y+1)]
+
+-------------------------------------
+isAlive :: [Pos] -> Pos -> Bool
+isAlive cells pos = elem pos cells
+
+isEmpty :: [Pos] -> Pos -> Bool
+isEmpty cells pos = not (isAlive cells pos)
+
+numNeighbors :: [Pos] -> Pos -> Int
+numNeighbors cells = length . filter (isAlive cells) . neighbors
+
+survivors :: [Pos] -> [Pos]
+survivors cells = [p | p <- cells, numNeighbors cells p `elem` [2, 3]]
+
+births :: [Pos] -> [Pos]
+births cells
+  = [p | p <- ordNub $ concatMap neighbors cells,
+    isEmpty cells p,
+    numNeighbors cells p == 3]
+
+-------------------------------------
+wrtCell :: Pos -> IO ()
+wrtCell (x, y) = do
+  setCursorPosition (y + 2) x
+  putStrLn "o"
+
+main :: IO ()
+main = do
+  cells <- ordNub <$> initCells
+  loop cells 0
+  where
+    loop :: [Pos] -> Int -> IO ()
+    loop cells step = do
+      clearScreen
+      mapM_ wrtCell cells
+      setCursorPosition 0 0
+      putStrLn $ "Generation : " ++ show step
+      threadDelay delayInterval
+      loop (ordNub $ (survivors cells) ++ (births cells)) $ step + 1
+```
